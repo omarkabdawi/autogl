@@ -1,0 +1,651 @@
+import React, { type JSX, useState } from 'react';
+
+type EmptyNode = {
+  type: "empty";
+};
+
+type VarNode = {
+  type: "var";
+  value: string;
+};
+
+type BottomNode = {
+  type: "bottom";
+};
+
+type BinaryOperator = "&&" | "||" | "-->" | "<->";
+
+type UnaryOperator = "!" | "Box";
+
+type OpNode = {
+  type: "op";
+  op: BinaryOperator;
+  left: Expr;
+  right: Expr;
+};
+
+type UnaryNode = {
+  type: "unary";
+  op: UnaryOperator;
+  expr: Expr;
+};
+
+type Expr =
+  | EmptyNode
+  | VarNode
+  | BottomNode
+  | OpNode
+  | UnaryNode;
+
+function Greeting(): JSX.Element {
+  return (<div>
+    <h1>Hello!!</h1>
+    <p>Welcome to the AutomatedGL application!</p>
+    </div>);
+}
+
+
+function createEmpty(): EmptyNode {
+  return { type: "empty" };
+}
+
+type InputMode = "buttons" | "text";
+
+type Token =
+  | { type: "op"; value: BinaryOperator }
+  | { type: "unary"; value: UnaryOperator }
+  | { type: "paren"; value: "(" | ")" }
+  | { type: "var"; value: string }
+  | { type: "bottom" };
+
+function serializeExpr(node: Expr): string {
+  if (node.type === "empty") return "";
+  if (node.type === "var") return node.value;
+  if (node.type === "bottom") return "⊥";
+  if (node.type === "unary") {
+    return `${node.op}(${serializeExpr(node.expr)})`;
+  }
+
+  return `(${serializeExpr(node.left)} ${node.op} ${serializeExpr(node.right)})`;
+}
+
+function tokenize(input: string): Token[] {
+  const tokens: Token[] = [];
+  let index = 0;
+
+  while (index < input.length) {
+    const current = input[index];
+
+    if (/\s/.test(current)) {
+      index += 1;
+      continue;
+    }
+
+    if (input.startsWith("<->", index)) {
+      tokens.push({ type: "op", value: "<->" });
+      index += 3;
+      continue;
+    }
+
+    if (input.startsWith("-->", index)) {
+      tokens.push({ type: "op", value: "-->" });
+      index += 3;
+      continue;
+    }
+
+    if (input.startsWith("&&", index)) {
+      tokens.push({ type: "op", value: "&&" });
+      index += 2;
+      continue;
+    }
+
+    if (input.startsWith("||", index)) {
+      tokens.push({ type: "op", value: "||" });
+      index += 2;
+      continue;
+    }
+
+    if (current === "!" || current === "(" || current === ")") {
+      tokens.push(current === "!" ? { type: "unary", value: "!" } : { type: "paren", value: current });
+      index += 1;
+      continue;
+    }
+
+    if (current === "⊥") {
+      tokens.push({ type: "bottom" });
+      index += 1;
+      continue;
+    }
+
+    const identifierMatch = /^[A-Za-z][A-Za-z0-9_]*/.exec(input.slice(index));
+    if (identifierMatch) {
+      const value = identifierMatch[0];
+      tokens.push(value === "Box" ? { type: "unary", value: "Box" } : { type: "var", value });
+      index += value.length;
+      continue;
+    }
+
+    throw new Error(`Unexpected character: ${current}`);
+  }
+
+  return tokens;
+}
+
+function parseTextExpression(input: string): Expr {
+  const trimmed = input.trim();
+
+  if (trimmed === "") {
+    return createEmpty();
+  }
+
+  const tokens = tokenize(trimmed);
+  let position = 0;
+
+  function peek(): Token | undefined {
+    return tokens[position];
+  }
+
+  function consume(): Token {
+    const token = tokens[position];
+    if (!token) {
+      throw new Error("Unexpected end of input");
+    }
+    position += 1;
+    return token;
+  }
+
+  function parsePrimary(): Expr {
+    const token = peek();
+
+    if (!token) {
+      throw new Error("Expected an expression");
+    }
+
+    if (token.type === "bottom") {
+      consume();
+      return { type: "bottom" };
+    }
+
+    if (token.type === "var") {
+      consume();
+      return { type: "var", value: token.value };
+    }
+
+    if (token.type === "paren" && token.value === "(") {
+      consume();
+      const expr = parseIff();
+      const closing = consume();
+
+      if (closing.type !== "paren" || closing.value !== ")") {
+        throw new Error("Missing closing parenthesis");
+      }
+
+      return expr;
+    }
+
+    throw new Error("Expected a variable, bottom, or parenthesized expression");
+  }
+
+  function parseUnary(): Expr {
+    const token = peek();
+
+    if (token?.type === "unary") {
+      consume();
+      return { type: "unary", op: token.value, expr: parseUnary() };
+    }
+
+    return parsePrimary();
+  }
+
+  function parseAnd(): Expr {
+    let left = parseUnary();
+
+    while (true) {
+      const token = peek();
+
+      if (!token || token.type !== "op" || token.value !== "&&") {
+        break;
+      }
+
+      consume();
+      left = { type: "op", op: "&&", left, right: parseUnary() };
+    }
+
+    return left;
+  }
+
+  function parseOr(): Expr {
+    let left = parseAnd();
+
+    while (true) {
+      const token = peek();
+
+      if (!token || token.type !== "op" || token.value !== "||") {
+        break;
+      }
+
+      consume();
+      left = { type: "op", op: "||", left, right: parseAnd() };
+    }
+
+    return left;
+  }
+
+  function parseImplication(): Expr {
+    let left = parseOr();
+
+    while (true) {
+      const token = peek();
+
+      if (!token || token.type !== "op" || token.value !== "-->") {
+        break;
+      }
+
+      consume();
+      left = { type: "op", op: "-->", left, right: parseOr() };
+    }
+
+    return left;
+  }
+
+  function parseIff(): Expr {
+    let left = parseImplication();
+
+    while (true) {
+      const token = peek();
+
+      if (!token || token.type !== "op" || token.value !== "<->") {
+        break;
+      }
+
+      consume();
+      left = { type: "op", op: "<->", left, right: parseImplication() };
+    }
+
+    return left;
+  }
+
+  const expr = parseIff();
+
+  if (position !== tokens.length) {
+    throw new Error("Unexpected trailing input");
+  }
+
+  return expr;
+}
+
+
+function FormulaBuilder() {
+  const [expr, setExpr] = useState<Expr>(createEmpty());
+  const [history, setHistory] = useState<Expr[]>([]);
+  const [inputMode, setInputMode] = useState<InputMode>("buttons");
+  const [textValue, setTextValue] = useState<string>(serializeExpr(createEmpty()));
+  const [textError, setTextError] = useState<string | null>(null);
+
+function updateExpr(newExpr: Expr): void {
+    setHistory((prev) => [...prev, expr]);
+    setExpr(newExpr);
+}
+
+  function switchInputMode(): void {
+    if (inputMode === "buttons") {
+      setTextValue(serializeExpr(expr));
+      setTextError(null);
+      setInputMode("text");
+      return;
+    }
+
+    setTextError(null);
+    setInputMode("buttons");
+  }
+
+  function handleTextChange(event: React.ChangeEvent<HTMLTextAreaElement>): void {
+    const nextValue = event.target.value;
+    setTextValue(nextValue);
+
+    try {
+      const nextExpr = parseTextExpression(nextValue);
+      setTextError(null);
+      setHistory((prev) => [...prev, expr]);
+      setExpr(nextExpr);
+    } catch (error) {
+      setTextError(error instanceof Error ? error.message : "Invalid expression");
+    }
+  }
+
+  function insertBottom() {
+  updateExpr(fill(expr, { type: "bottom" }));
+}
+
+  function undo() {
+    if (history.length > 0) {
+      setHistory((prev) => {
+        const newHistory = [...prev];
+        const prevExpr = newHistory.pop();
+        if (prevExpr) { setExpr(prevExpr);}
+        return newHistory;
+      });
+    }
+  }
+
+function fill(node: Expr, value: string | Expr): Expr {
+    let filled = false;
+
+    function walk(current: Expr): Expr {
+      if (!current) return current;
+
+      if (current.type === "empty") {
+        if (filled) return current;
+        filled = true;
+        return typeof value === "string" ? { type: "var", value }: value;
+      }
+
+      if (current.type === "op") {
+        const left = walk(current.left);
+        const right = filled ? current.right : walk(current.right);
+        return { ...current, left, right };
+      }
+
+      if (current.type === "unary") {
+        const expr = walk(current.expr);
+        return { ...current, expr };
+      }
+
+      return current;
+    }
+
+    return walk(node);
+  }
+
+
+ function insertOperator(op: BinaryOperator): void {
+    updateExpr({
+      type: "op",
+      op,
+      left: expr,
+      right: createEmpty(),
+    });
+  }
+
+
+  function insertUnary(op: UnaryOperator): void {
+   const unaryNode: UnaryNode = {
+    type: "unary",
+    op,
+    expr: createEmpty(),
+  };
+
+  // try to fill an empty spot
+  function tryFill(node: Expr): { result: Expr; didFill: boolean } {
+    let didFill = false;
+
+    function walk(current: Expr): Expr {
+      if (!current) return current;
+
+      if (current.type === "empty") {
+        if (didFill) return current;
+        didFill = true;
+        return unaryNode;
+      }
+
+      if (current.type === "op") {
+        const left = walk(current.left);
+        const right = didFill ? current.right : walk(current.right);
+        return { ...current, left, right };
+      }
+
+      if (current.type === "unary") {
+        return { ...current, expr: walk(current.expr) };
+      }
+
+      return current;
+    }
+
+    const result = walk(node);
+    return { result, didFill };
+  }
+
+  const { result, didFill } = tryFill(expr);
+
+  if (didFill) {
+    updateExpr(result);
+  } else {
+    // fallback: wrap whole expression
+    updateExpr({
+      type: "unary",
+      op,
+      expr: expr,
+    });
+  }
+}
+
+ function insertVar(v: string): void {
+  updateExpr(fill(expr, v));
+}
+
+  function normalize(node: Expr): Expr {
+  if (!node) return node;
+
+  // base cases
+  if (node.type === "var" || node.type === "bottom" || node.type === "empty") {
+    return node;
+  }
+
+  // unary
+
+  
+  if (node.type === "unary") {
+    if (node.op === "!") {
+      // ¬A = A → ⊥
+      return normalize({
+        type: "op",
+        op: "-->",
+        left: node.expr,
+        right: { type: "bottom" },
+      });
+    }
+    // Box stays the same
+    if (node.op === "Box") {
+      return {
+        type: "unary",
+        op: "Box",
+        expr: normalize(node.expr),
+      };
+    }
+  }
+
+  // binary
+  if (node.type === "op") {
+    const A = node.left;
+    const B = node.right;
+
+    // implication stays the same
+    if (node.op === "-->") {
+      return {
+        type: "op",
+        op: "-->",
+        left: normalize(A),
+        right: normalize(B),
+      };
+    }
+
+    // AND: A ∧ B = ¬(A → ¬B)
+    if (node.op === "&&") {
+      return normalize({
+        type: "unary",
+        op: "!",
+        expr: {
+          type: "op",
+          op: "-->",
+          left: A,
+          right: {
+            type: "unary",
+            op: "!",
+            expr: B,
+          },
+        },
+      });
+    }
+
+    // OR: A ∨ B = (¬A → B)
+    if (node.op === "||") {
+      return normalize({
+        type: "op",
+        op: "-->",
+        left: {
+          type: "unary",
+          op: "!",
+          expr: A,
+        },
+        right: B,
+      });
+    }
+
+    // IFF: A ↔ B = (A → B) ∧ (B → A)
+    if (node.op === "<->") {
+      return normalize({
+        type: "op",
+        op: "&&",
+        left: {
+          type: "op",
+          op: "-->",
+          left: A,
+          right: B,
+        },
+        right: {
+          type: "op",
+          op: "-->",
+          left: B,
+          right: A,
+        },
+      });
+    }
+  }
+
+  return node;
+}
+const colors = [
+  "#3D40FF", // indigo
+  "#8785FF", // periwinkle
+  "#85FF95", // mint
+  "#FF8056", // coral
+  "#FFED65",  // yellow
+  "#FF5454", // red
+  "#F157FF" // magenta
+];
+function renderExpr(node: Expr, depth = 0): React.ReactNode {
+  const color = colors[depth % colors.length];
+
+  if (node.type === "empty") return "____";
+  if (node.type === "var") return node.value;
+  if (node.type === "bottom") return "⊥";
+  if (node.type === "op") {
+    return (
+      <>
+        <span style={{ color }}>(</span>
+        {renderExpr(node.left, depth + 1)} {node.op} {renderExpr(node.right, depth + 1)}
+        <span style={{ color }}>)</span>
+      </>
+    );
+  }
+
+  if (node.type === "unary") {
+    return (
+      <>
+        {node.op}
+        <span style={{ color }}>(</span>
+        {renderExpr(node.expr, depth + 1)}
+        <span style={{ color }}>)</span>
+      </>
+    );
+  }
+
+  return null;
+}
+
+  return (
+    <div style={{ padding: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 12 }}>
+        <h3 style={{ margin: 0 }}>Formula Builder</h3>
+        <button onClick={switchInputMode}>
+          {inputMode === "buttons" ? "Switch to Text Input" : "Switch to Button Input"}
+        </button>
+      </div>
+
+      {inputMode === "text" ? (
+        <div style={{ marginBottom: 16 }}>
+          <textarea
+            value={textValue}
+            onChange={handleTextChange}
+            placeholder="Example: !(p && Box(q)) --> ⊥"
+            rows={4}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: 12,
+              font: "inherit",
+              resize: "vertical",
+            }}
+          />
+          <div style={{ minHeight: 20, marginTop: 8, color: textError ? "#c1121f" : "inherit" }}>
+            {textError ? textError : "Use !, Box, &&, ||, -->, <->, parentheses, and ⊥."}
+          </div>
+        </div>
+      ) : null}
+
+      {inputMode === "buttons" ? (
+        <>
+          {/* binary ops */}
+          <div style={{ marginBottom: 10 }}>
+            <button onClick={() => insertOperator("&&")}>&&</button>
+            <button onClick={() => insertOperator("||")}>||</button>
+            <button onClick={() => insertOperator("-->")}>→</button>
+            <button onClick={() => insertOperator("<->")}>↔</button>
+          </div>
+
+          {/* unary ops */}
+          <div style={{ marginBottom: 10 }}>
+            <button onClick={() => insertUnary("!")}>NOT (!)</button>
+            <button onClick={() => insertUnary("Box")}>Box</button>
+          </div>
+
+          {/* variables */}
+          <div style={{ marginBottom: 10 }}>
+            <button onClick={() => insertVar("p")}>p</button>
+            <button onClick={() => insertVar("q")}>q</button>
+            <button onClick={() => insertVar("r")}>r</button>
+            <button onClick={() => insertVar("s")}>s</button>
+            <button onClick={insertBottom}>⊥</button>
+          </div>
+
+          <div style={{ marginBottom: 10 }}>
+            <button onClick={() => updateExpr(createEmpty())}>Clear</button>
+            <button onClick={undo} disabled={history.length === 0}>Undo</button>
+          </div>
+        </>
+      ) : null}
+
+      <div style={{ fontSize: 20 }}>
+        {renderExpr(expr)}
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <button onClick={() => updateExpr(normalize(expr))}>Normalize</button>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+function App() {
+  return (
+    <div>
+      <Greeting />
+      <FormulaBuilder />
+    </div>
+  );
+}
+
+export default App;

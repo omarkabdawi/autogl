@@ -1,0 +1,15 @@
+Box(p --> q) || Box(!(Box(p --> p)) --> Box(q)) valid 
+
+Box(p --> q) && Box(!(Box(p --> p)) --> Box(q)) not valid
+
+(!(Box(!(p))) --> (Box((p-->q)-->q))) not valid 
+
+(Box((p --> q)) --> Box(Box(Box(p-->q)))) valid 
+
+valid: ¬□⊥→¬□¬□⊥
+
+invalid: □p→p
+
+invalid: □p→◊p
+
+invalid: ◊p→□◊p

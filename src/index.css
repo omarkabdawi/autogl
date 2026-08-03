@@ -1,0 +1,311 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap');
+
+:root {
+  --text: #000000;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: 'Noto Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #000000;
+    --text-h: rgb(0, 0, 0);
+    --bg: #ffffff;
+    --border: #ffffff;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.app-content {
+  padding-top: 90px;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  background: #7d8894;
+  color: #ffffff;
+  border: 1px solid #7d8894;
+  border-radius: 2px;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+button:hover {
+  background: #6d7782;
+  border-color: #6d7782;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:focus-visible {
+  outline: 2px solid #4e5966;
+  outline-offset: 2px;
+}
+
+.formula-builder {
+  --formula-builder-title-color: #001450;
+  --formula-builder-textarea-bg: #d0d5dc;
+  --formula-builder-output-bg: #d0d5dc;
+  --formula-builder-output-text: #000000;
+  --formula-builder-switch-button-bg: #7d8894;
+  --formula-builder-switch-button-hover: #6d7782;
+  --formula-builder-clear-button-bg: #6f7b88;
+  --formula-builder-clear-button-hover: #5f6b77;
+  --formula-builder-undo-button-bg: #8b94a0;
+  --formula-builder-undo-button-hover: #79828d;
+  --formula-builder-normalize-button-bg: #56657a;
+  --formula-builder-normalize-button-hover: #485668;
+  --formula-builder-run-button-bg: #4f6d7a;
+  --formula-builder-run-button-hover: #435b66;
+  --formula-builder-log-toggle-button-bg: #66708c;
+  --formula-builder-log-toggle-button-hover: #58607a;
+  --formula-builder-log-checkbox-checked: #c8c8ff;
+}
+
+.formula-builder-title {
+  color: var(--formula-builder-title-color);
+}
+
+.formula-builder-textarea {
+  background: var(--formula-builder-textarea-bg);
+  border-color: var(--formula-builder-textarea-bg);
+  color: #000000;
+}
+
+.formula-builder-output,
+.formula-builder-log {
+  background: var(--formula-builder-output-bg) !important;
+  color: var(--formula-builder-output-text) !important;
+}
+
+.formula-builder-log-checkbox {
+  accent-color: var(--formula-builder-log-checkbox-checked);
+}
+
+.formula-builder-switch-button {
+  background: #2F57B2;
+  border-color: #2F57B2;
+  color: #ffffff;
+}
+
+.formula-builder-switch-button:hover {
+  background: #97C6FF;
+  border-color: #97C6FF;
+  color: #000000;
+}
+
+.formula-builder-clear-button {
+  background: #D20F41;
+  border-color: #D20F41;
+  color: #ffffff;
+}
+
+.formula-builder-clear-button:hover {
+  background: #FFAAA5;
+  border-color: #FFAAA5;
+  color: #000000;
+}
+
+.formula-builder-undo-button {
+  background: #323F4B;
+  border-color: #323F4B;
+  color: #ffffff;
+}
+
+.formula-builder-undo-button:hover {
+  background: #A5AEB8;
+  border-color: #A5AEB8;
+  color: #000000;
+}
+
+.formula-builder-normalize-button {
+  background: #FFC700;
+  border-color: #FFC700;
+  color: #000000;
+}
+
+.formula-builder-normalize-button:hover {
+   background: #FFE483;
+  border-color: #FFE483;
+  color: #000000;
+}
+
+.formula-builder-run-button {
+  background: #007D48;
+  border-color: #007D48;
+  color: #ffffff;
+}
+
+.formula-builder-run-button:hover {
+  background: #8Ce6AA;
+  border-color: #8Ce6AA;
+  color: #000000;
+}
+
+.formula-builder-log-toggle-button {
+   background: #D20F41;
+  border-color: #D20F41;
+  color: #ffffff;
+}
+
+.formula-builder-log-toggle-button:hover {
+    background: #FFAAA5;
+  border-color: #FFAAA5;
+  color: #000000;
+
+}
+
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+
+  background: rgb(0,0,140);
+  color: white;
+  border-bottom: 1px solid #334155;
+
+  z-index: 1000;
+}
+.logo {
+  height: 70px;
+  width: auto;
+}
+
+.app-greeting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-greeting p {
+  margin: 0;
+}
+
+.app-header-link {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  color: white;
+  padding: 0.45rem 0.8rem;
+}
+
+.app-header-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 1);
+  color: white;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+/* Space buttons inside the Formula Builder to avoid crowding */
+.formula-builder button {
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
