@@ -37,8 +37,8 @@ function AboutPage() {
       <h2 style={{ marginTop: 20, color: "#001450" }}>Need a Valid Formula?</h2>
       <p>
         We understand that it can be difficult to come up with a valid formula in GL, so we have provided a CSV 
-        file of 269 valid formulae of size 2 to 17 that you can use to test the application. Download it <a href="/269validFormulae.csv" download style={{ color: "#0066cc", fontWeight: 600 }}>here</a>.
-        You can also download one for invalid formulae <a href="/1192invalidFormulae.csv" download style={{ color: "#0066cc", fontWeight: 600 }}>here</a>. Admittedly, the invalid formulae are mostly not very interesting. These respective CSV files are what we draw from when you click the "Random Valid Formula" or "Random Invalid Formula" buttons. Note that some formulae will take sometime to compute, especially the larger ones. The application will not freeze, but it may take a while to return a result.
+        file of 269 valid formulae of size 2 to 17 that you can use to test the application. Download it <a href={`${import.meta.env.BASE_URL}269validFormulae.csv`} download style={{ color: "#0066cc", fontWeight: 600 }}>here</a>.
+        You can also download one for invalid formulae <a href={`${import.meta.env.BASE_URL}1192invalidFormulae.csv`} download style={{ color: "#0066cc", fontWeight: 600 }}>here</a>. Admittedly, the invalid formulae are mostly not very interesting. These respective CSV files are what we draw from when you click the "Random Valid Formula" or "Random Invalid Formula" buttons. Note that some formulae will take sometime to compute, especially the larger ones. The application will not freeze, but it may take a while to return a result.
       </p>
      
 

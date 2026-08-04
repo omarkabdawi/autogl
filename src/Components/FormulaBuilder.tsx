@@ -109,7 +109,7 @@ function log(message: string): void {
     if (validFormulas) return validFormulas;
     setLoadingValid(true);
     try {
-      const res = await fetch('/269validFormulae.csv');
+      const res = await fetch(`${import.meta.env.BASE_URL}269validFormulae.csv`);
       const txt = await res.text();
       const lines = txt.replace(/\r/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
       if (lines.length <= 1) return [];
@@ -132,7 +132,7 @@ function log(message: string): void {
     if (invalidFormulas) return invalidFormulas;
     setLoadingInvalid(true);
     try {
-      const res = await fetch('/1192invalidFormulae.csv');
+      const res = await fetch(`${import.meta.env.BASE_URL}1192invalidFormulae.csv`);
       const txt = await res.text();
       const lines = txt.replace(/\r/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
       if (lines.length <= 1) return [];
