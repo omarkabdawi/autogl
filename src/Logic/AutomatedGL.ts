@@ -47,6 +47,7 @@ export function AutoGL(seq: treeSeq.TreeSeq, log: (message: string) => void): bo
             return AutoGL(seq, log);            
         }else{
             log("Left branch of implication failed, no further actions");
+            return false;
         }
         //return AutoGL(clone) && AutoGL(seq);
         } 
