@@ -11,10 +11,10 @@ function AboutPage() {
       <h2 style={{ marginTop: 0, color: "#001450" }}>About AutomatedGL</h2>
       <p>
         AutomatedGL is a formula builder and proof-search interface for the provability logic GL. It is a rough implementation of the 
-        algorithm described in the paper <a href="https://gist.science/paper/2606.03484#technical" target="_blank" rel="noopener noreferrer">
+        algorithm described in the paper <a href="https://arxiv.org/abs/2606.03484" target="_blank" rel="noopener noreferrer">
         Optimizing Proof-Search via Linearization for Gödel-Löb Logic with Tree-Hypersequents</a> by T. S. Lyon and O. Y. A. A. Taher. The difference
         between the algorithm implemented here and the one described in the paper is that this implementation does not use the system <a href="https://shs.hal.science/halshs-00775808/document" target="_blank" rel="noopener noreferrer">CSGL</a> as 
-        its proof calculus, but <a href="https://link.springer.com/article/10.1007/s10992-005-2267-3" target="_blank" rel="noopener noreferrer">C3KGL</a>. This application was made as part 
+        its proof calculus, but <a href="https://link.springer.com/article/10.1007/s10992-005-2267-3" target="_blank" rel="noopener noreferrer">G3KGL</a>. This application was made as part 
         of Omar Y. A. A. Taher's Master's thesis at TU Dresden under supervision of Dr. Tim S. Lyon and Dr. habil. Hannes Straß. Taher is a recepient of a DAAD scholarship through the
         School of Embedded Composite Artificial Intelligence <a href="https://secai.org/" target="_blank" rel="noopener noreferrer">(SECAI)</a>.
       </p>
